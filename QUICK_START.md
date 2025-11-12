@@ -11,8 +11,8 @@ Before you begin, make sure you have:
 - [ ] Helm installed
 - [ ] kubectl installed
 - [ ] GitHub Personal Access Token created
-- [ ] At least 8 CPU cores and 16GB RAM available
-- [ ] 100GB free disk space
+- [ ] At least 4 CPU cores and 8GB RAM available (8+ cores and 16GB+ recommended)
+- [ ] 50GB free disk space (100GB+ recommended)
 
 ## 🚀 Step-by-Step Setup
 
@@ -42,17 +42,20 @@ Start Minikube with appropriate resources:
 
 ```bash
 # For basic setup (minimum requirements)
+minikube start --cpus=4 --memory=8g --disk-size=50g --driver=docker
+
+# For better performance (recommended)
 minikube start --cpus=8 --memory=16g --disk-size=100g --driver=docker
 
-# For GPU-enabled setup (recommended for ML features)
+# For GPU-enabled setup (optional - only if using ML/AI features with NVIDIA GPU)
 minikube start \
-  --cpus=32 \
-  --memory=64g \
-  --disk-size=500g \
+  --cpus=8 \
+  --memory=16g \
+  --disk-size=100g \
   --driver=docker \
   --container-runtime=containerd
 
-# Enable GPU support (if you have NVIDIA GPU)
+# Enable GPU support (optional - only if you have NVIDIA GPU and need ML features)
 minikube addons enable nvidia-device-plugin
 ```
 
@@ -125,9 +128,9 @@ Build the custom Docker image with all required tools:
 This will take 10-20 minutes as it:
 - Downloads the GitHub Actions runner base image
 - Installs Node.js, Python, and development tools
-- Downloads and installs CodeQL (v2.23.2)
-- Installs PyTorch and AI/ML libraries
-- Installs VS Code CLI
+- **Downloads and installs CodeQL (v2.23.2)** - **REQUIRED** for GitHub Copilot Coding Agent
+- Installs PyTorch and AI/ML libraries (optional features)
+- Installs VS Code CLI (optional debugging tool)
 
 Monitor the build for any errors. Expected final output:
 ```
@@ -202,7 +205,7 @@ arc-runner-set-copilot-coding-agent-listener-xxxxx-xxxx        1/1     Running  
              echo "Runner is working!"
              echo "Node version: $(node --version)"
              echo "Python version: $(python --version)"
-             echo "CodeQL version: $(codeql --version)"
+             echo "CodeQL version: $(codeql --version)"  # CodeQL is required for Copilot Agent
              
          - name: Checkout code
            uses: actions/checkout@v4
@@ -223,7 +226,9 @@ arc-runner-set-copilot-coding-agent-listener-xxxxx-xxxx        1/1     Running  
    - A runner pod will be created automatically
    - After completion, the runner pod will be cleaned up
 
-### Step 9: Set Up CodeQL Workflow (Optional)
+### Step 9: Set Up CodeQL Workflow (Recommended)
+
+The example CodeQL workflow demonstrates a **workaround** to use the pre-installed CodeQL binary. This bootstrap step is necessary because GitHub Copilot Coding Agent requires CodeQL, and this approach avoids re-downloading CodeQL on every workflow run.
 
 If you want to use the example CodeQL workflow:
 
@@ -297,9 +302,12 @@ This will nuke and reinstall everything.
 
 ### Issue: "Minikube start" fails with resource error
 
-**Solution**: Reduce resources or free up system resources
+**Solution**: Adjust resources based on your system capabilities
 ```bash
-# Try with minimum specs
+# Try with absolute minimum specs (may be slow)
+minikube start --cpus=2 --memory=4g --disk-size=30g --driver=docker
+
+# Recommended minimum for good performance
 minikube start --cpus=4 --memory=8g --disk-size=50g --driver=docker
 ```
 
